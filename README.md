@@ -1,1 +1,1 @@
-# OpenWFH - Business Stack
+# OpenWFH - Docker-Compose Stack

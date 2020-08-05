@@ -1,0 +1,72 @@
+version: '3'
+
+networks:
+  default:
+    external: 
+      name: traefik_default
+  nextcloud:
+    external: false
+
+services:
+  nextcloud:
+    image: nextcloud:18.0.4
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.nextcloud-caldav.redirectregex.permanent=true"
+      - "traefik.http.middlewares.nextcloud-caldav.redirectregex.regex=^https://(.*)/.well-known/(card|cal)dav"
+      - "traefik.http.middlewares.nextcloud-caldav.redirectregex.replacement=https://$${1}/remote.php/dav/"
+      - "traefik.http.middlewares.nextcloud-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.nextcloud-http.entrypoints=web"
+      - "traefik.http.routers.nextcloud-http.rule=Host(`nextcloud.docker.guru`)"
+      - "traefik.http.routers.nextcloud-http.middlewares=nextcloud-https@docker"
+      - "traefik.http.routers.nextcloud.entrypoints=websecure"
+      - "traefik.http.routers.nextcloud.rule=Host(`nextcloud.docker.guru`)"
+      - "traefik.http.routers.nextcloud.middlewares=nextcloud-caldav@docker"
+      - "traefik.http.routers.nextcloud.tls=true"
+      - "traefik.http.routers.nextcloud.tls.certresolver=myresolver"
+    depends_on:
+      - nextcloud-db           # If using MySQL
+      - redis                  # If using Redis
+    environment:
+      - UID=1000
+      - GID=1000
+      - UPLOAD_MAX_SIZE=10G
+      - APC_SHM_SIZE=128M
+      - OPCACHE_MEM_SIZE=128
+      - CRON_PERIOD=15m
+      - TZ=America/New_York
+      - DOMAIN=localhost
+      - DB_TYPE=mysql
+      - DB_NAME=nextcloud
+      - DB_USER=nextcloud
+      - DB_PASSWORD=supersecretpassword
+      - DB_HOST=nextcloud-db
+    volumes:
+      - ../../data/volumes/nextcloud/data:/data
+      - ../../data/volumes/nextcloud/config:/config
+      - ../../data/volumes/nextcloud/apps:/apps2
+      - ../../data/volumes/nextcloud/themes:/nextcloud/themes
+    networks:
+      - default
+
+  # If using MySQL
+  nextcloud-db:
+    image: mariadb
+    volumes:
+      - ../../data/volumes/nextcloud/db:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=supersecretpassword
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_PASSWORD=supersecretpassword
+    networks:
+      - default
+    
+  # If using Redis
+  redis:
+    image: redis:alpine
+    container_name: redis
+    volumes:
+      - ../../data/volumes/nextcloud/redis:/data
+    networks:
+      - default

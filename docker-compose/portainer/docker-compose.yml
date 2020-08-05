@@ -1,0 +1,25 @@
+version: "2"
+
+services: 
+  portainer:
+    image: portainer/portainer
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data:/data
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.portainer-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.portainer-http.entrypoints=web"
+      - "traefik.http.routers.portainer-http.rule=Host(`portainer.docker.guru`)"
+      - "traefik.http.routers.portainer-http.middlewares=portainer-https@docker"
+      - "traefik.http.routers.portainer.entrypoints=web-secure"
+      - "traefik.http.routers.portainer.rule=Host(`portainer.docker.guru`)"
+      - "traefik.http.routers.portainer.tls=true"
+      - "traefik.http.routers.portainer.tls.certresolver=default"
+      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+      - "traefik.docker.network=degoogle_default"
+networks:
+  default:
+    external:
+      name: degoogle_default

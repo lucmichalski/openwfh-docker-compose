@@ -17,13 +17,13 @@ services:
       - "traefik.http.middlewares.nextcloud-caldav.redirectregex.replacement=https://$${1}/remote.php/dav/"
       - "traefik.http.middlewares.nextcloud-https.redirectscheme.scheme=https"
       - "traefik.http.routers.nextcloud-http.entrypoints=web"
-      - "traefik.http.routers.nextcloud-http.rule=Host(`nextcloud.docker.guru`)"
+      - "traefik.http.routers.nextcloud-http.rule=Host(`${HOSTNAME}`)"
       - "traefik.http.routers.nextcloud-http.middlewares=nextcloud-https@docker"
       - "traefik.http.routers.nextcloud.entrypoints=websecure"
-      - "traefik.http.routers.nextcloud.rule=Host(`nextcloud.docker.guru`)"
+      - "traefik.http.routers.nextcloud.rule=Host(`${HOSTNAME}`)"
       - "traefik.http.routers.nextcloud.middlewares=nextcloud-caldav@docker"
       - "traefik.http.routers.nextcloud.tls=true"
-      - "traefik.http.routers.nextcloud.tls.certresolver=myresolver"
+      - "traefik.http.routers.nextcloud.tls.certresolver=${RESOLVER}"
     depends_on:
       - nextcloud-db           # If using MySQL
       - redis                  # If using Redis

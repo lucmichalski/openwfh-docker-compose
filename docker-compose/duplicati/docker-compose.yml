@@ -7,13 +7,13 @@ services:
       - "traefik.enable=true"
       - "traefik.http.middlewares.duplicati-https.redirectscheme.scheme=https"
       - "traefik.http.routers.duplicati-http.entrypoints=web"
-      - "traefik.http.routers.duplicati-http.rule=Host(`duplicati.docker.guru`)"
+      - "traefik.http.routers.duplicati-http.rule=Host(`${HOSTNAME}`)"
       - "traefik.http.routers.duplicati-http.middlewares=duplicati-https@docker"
       - "traefik.http.routers.duplicati.entrypoints=websecure"
-      - "traefik.http.routers.duplicati.rule=Host(`duplicati.docker.guru`)"
+      - "traefik.http.routers.duplicati.rule=Host(`${HOSTNAME}`)"
       - "traefik.http.routers.duplicati.tls=true"
-      - "traefik.http.routers.duplicati.tls.certresolver=myresolver"
-      - "traefik.http.services.duplicati.loadbalancer.server.port=8200"
+      - "traefik.http.routers.duplicati.tls.certresolver=${RESOLVER}"
+      - "traefik.http.services.duplicati.loadbalancer.server.port=${SERVER_PORT}"
     container_name: duplicati
     environment:
       - PUID=1000

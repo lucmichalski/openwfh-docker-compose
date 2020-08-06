@@ -11,13 +11,13 @@ services:
       - "traefik.enable=true"
       - "traefik.http.middlewares.portainer-https.redirectscheme.scheme=https"
       - "traefik.http.routers.portainer-http.entrypoints=web"
-      - "traefik.http.routers.portainer-http.rule=Host(`portainer.docker.guru`)"
+      - "traefik.http.routers.portainer-http.rule=Host(`${HOSTNAME}`)"
       - "traefik.http.routers.portainer-http.middlewares=portainer-https@docker"
       - "traefik.http.routers.portainer.entrypoints=web-secure"
-      - "traefik.http.routers.portainer.rule=Host(`portainer.docker.guru`)"
+      - "traefik.http.routers.portainer.rule=Host(`${HOSTNAME}`)"
       - "traefik.http.routers.portainer.tls=true"
-      - "traefik.http.routers.portainer.tls.certresolver=default"
-      - "traefik.http.services.portainer.loadbalancer.server.port=9000"
+      - "traefik.http.routers.portainer.tls.certresolver=${RESOLVER}"
+      - "traefik.http.services.portainer.loadbalancer.server.port=${SERVER_PORT}"
       - "traefik.docker.network=degoogle_default"
 networks:
   default:

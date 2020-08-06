@@ -7,13 +7,13 @@ services:
       - "traefik.enable=true"
       - "traefik.http.middlewares.rocketchat-https.redirectscheme.scheme=https"
       - "traefik.http.routers.rocketchat-http.entrypoints=web"
-      - "traefik.http.routers.rocketchat-http.rule=Host(`rocketchat.docker.guru`)"
+      - "traefik.http.routers.rocketchat-http.rule=Host(`${HOSTNAME}`)"
       - "traefik.http.routers.rocketchat-http.middlewares=rocketchat-https@docker"
       - "traefik.http.routers.rocketchat.entrypoints=websecure"
-      - "traefik.http.routers.rocketchat.rule=Host(`rocketchat.docker.guru`)"
+      - "traefik.http.routers.rocketchat.rule=Host(`${HOSTNAME}`)"
       - "traefik.http.routers.rocketchat.tls=true"
-      - "traefik.http.routers.rocketchat.tls.certresolver=myresolver"
-      - "traefik.http.services.rocketchat.loadbalancer.server.port=3000"
+      - "traefik.http.routers.rocketchat.tls.certresolver=${RESOLVER}"
+      - "traefik.http.services.rocketchat.loadbalancer.server.port=${SERVER_PORT}"
       - "traefik.docker.network=traefik_default"
     command: >
       bash -c

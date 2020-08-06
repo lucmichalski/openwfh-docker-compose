@@ -1,0 +1,43 @@
+version: '3.4'
+services:
+  passbolt:
+    image: passbolt/passbolt:2.13.5-debian
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.passbolt-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.passbolt-http.entrypoints=web"
+      - "traefik.http.routers.passbolt-http.rule=Host(`${HOSTNAME}`)"
+      - "traefik.http.routers.passbolt-http.middlewares=passbolt-https@docker"
+      - "traefik.http.routers.passbolt.entrypoints=websecure"
+      - "traefik.http.routers.passbolt.rule=Host(`${HOSTNAME}`)"
+      - "traefik.http.routers.passbolt.tls=true"
+      - "traefik.http.routers.passbolt.tls.certresolver=${RESOLVER}"
+      - "traefik.http.services.passbolt.loadbalancer.server.port=${SERVER_PORT}"
+    tty: true
+    depends_on:
+      - db
+    env_file:
+      - env/passbolt.env
+    volumes:
+      - gpg_volume:/var/www/passbolt/config/gpg
+      - images_volume:/var/www/passbolt/webroot/img/public
+    tmpfs:
+      - /run
+    command: ["/usr/bin/wait-for.sh", "-t", "0", "db:3306", "--", "/docker-entrypoint.sh"]
+    ports:
+      - 80:80
+      - 443:443
+
+  db:
+    image: mariadb:10.3
+    env_file:
+      - env/mysql.env
+    volumes:
+      - database_volume:/var/lib/mysql
+    ports:
+      - "127.0.0.1:3306:3306"
+
+volumes:
+  database_volume:
+  gpg_volume:
+  images_volume:

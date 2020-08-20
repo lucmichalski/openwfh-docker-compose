@@ -1,27 +1,29 @@
----
 version: "2.1"
 services:
   wikijs:
     image: linuxserver/wikijs
+    container_name: wikijs
+    restart: unless-stopped
     labels:
       - "traefik.enable=true"
       - "traefik.http.middlewares.wikijs-https.redirectscheme.scheme=https"
       - "traefik.http.routers.wikijs-http.entrypoints=web"
       - "traefik.http.routers.wikijs-http.rule=Host(`${HOSTNAME}`)"
-      - "traefik.http.routers.wikijs-http.middlewares=duplicati-https@docker"
+      - "traefik.http.routers.wikijs-http.middlewares=wikijs-https@docker"
       - "traefik.http.routers.wikijs.entrypoints=websecure"
       - "traefik.http.routers.wikijs.rule=Host(`${HOSTNAME}`)"
       - "traefik.http.routers.wikijs.tls=true"
       - "traefik.http.routers.wikijs.tls.certresolver=${RESOLVER}"
       - "traefik.http.services.wikijs.loadbalancer.server.port=${SERVER_PORT}"
-    container_name: wikijs
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/London
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
     volumes:
-      - path to config:/config
-      - path to data:/data
-    ports:
-      - 3000:3000
-    restart: unless-stopped
+      - /srv/wikijs/config:/config
+      - /srv/wikijs/data:/data
+
+networks:
+  default:
+    external:
+      name: traefik_default

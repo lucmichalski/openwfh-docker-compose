@@ -2,6 +2,7 @@ version: '3.4'
 services:
   passbolt:
     image: passbolt/passbolt:2.13.5-debian
+    container_name: passbolt
     labels:
       - "traefik.enable=true"
       - "traefik.http.middlewares.passbolt-https.redirectscheme.scheme=https"
@@ -16,28 +17,40 @@ services:
     tty: true
     depends_on:
       - db
-    env_file:
-      - env/passbolt.env
+    environment:
+      - APP_FULL_BASE_URL=${APP_FULL_BASE_URL}
+      - PASSBOLT_REGISTRATION_PUBLIC=${PASSBOLT_REGISTRATION_PUBLIC}
+      - DATASOURCES_DEFAULT_HOST=${DATASOURCES_DEFAULT_HOST}
+      - DATASOURCES_DEFAULT_USERNAME=${DATASOURCES_DEFAULT_USERNAME}
+      - DATASOURCES_DEFAULT_PASSWORD=${DATASOURCES_DEFAULT_PASSWORD}
+      - DATASOURCES_DEFAULT_DATABASE=${DATASOURCES_DEFAULT_DATABASE}
+      - DATASOURCES_DEFAULT_PORT=${DATASOURCES_DEFAULT_PORT}
+      - DATASOURCES_QUOTE_IDENTIFIER=${DATASOURCES_QUOTE_IDENTIFIER}
     volumes:
+      # - /srv/passbolt/config:/var/www/passbolt/config/gpg
       - gpg_volume:/var/www/passbolt/config/gpg
-      - images_volume:/var/www/passbolt/webroot/img/public
+      - /srv/passbolt/data:/var/www/passbolt/webroot/img/public
     tmpfs:
       - /run
     command: ["/usr/bin/wait-for.sh", "-t", "0", "db:3306", "--", "/docker-entrypoint.sh"]
-    ports:
-      - 80:80
-      - 443:443
-
+    #ports:
+    #  - 80:80
+    # - 443:443
   db:
     image: mariadb:10.3
-    env_file:
-      - env/mysql.env
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     volumes:
-      - database_volume:/var/lib/mysql
-    ports:
-      - "127.0.0.1:3306:3306"
+      - /srv/passbolt/mariadb:/var/lib/mysql
+    #ports:
+    #  - "127.0.0.1:3306:3306"
 
 volumes:
-  database_volume:
   gpg_volume:
-  images_volume:
+networks:
+  default:
+    external:
+        name: traefik_default

@@ -1,8 +1,9 @@
 version: '2'
-
 services:
   rocketchat:
     image: rocketchat/rocket.chat:latest
+    container_name: rocketchat
+    restart: unless-stopped
     labels:
       - "traefik.enable=true"
       - "traefik.http.middlewares.rocketchat-https.redirectscheme.scheme=https"
@@ -14,7 +15,7 @@ services:
       - "traefik.http.routers.rocketchat.tls=true"
       - "traefik.http.routers.rocketchat.tls.certresolver=${RESOLVER}"
       - "traefik.http.services.rocketchat.loadbalancer.server.port=${SERVER_PORT}"
-      - "traefik.docker.network=traefik_default"
+      #- "traefik.docker.network=traefik_default"
     command: >
       bash -c
         "for i in `seq 1 30`; do
@@ -23,21 +24,20 @@ services:
           echo \"Tried $$i times. Waiting 5 secs...\";
           sleep 5;
         done; (exit $$s)"
-    restart: unless-stopped
     volumes:
-      - ./uploads:/app/uploads
+      - /srv/rocketchat/data:/app/uploads
     environment:
-      - PORT=3000
-      - ROOT_URL=http://rocketchat.docker.guru
-      - MONGO_URL=mongodb://mongo:27017/rocketchat
-      - MONGO_OPLOG_URL=mongodb://mongo:27017/local
-      - MAIL_URL=smtp://smtp.email
+      - PORT=${SERVER_PORT}
+      - ROOT_URL=http://${HOSTNAME}
+      - MONGO_URL=${MONGO_URL}
+      - MONGO_OPLOG_URL=${MONGO_OPLOG_URL}
+      - MAIL_URL=${MAIL_URL}
 #       - HTTP_PROXY=http://proxy.domain.com
 #       - HTTPS_PROXY=http://proxy.domain.com
     depends_on:
       - mongo
-    ports:
-      - 3000:3000
+    # ports:
+    #   - 3000:3000
     networks:
       - default
 
@@ -45,7 +45,7 @@ services:
     image: mongo:4.0
     restart: unless-stopped
     volumes:
-     - ./data/db:/data/db
+     - /srv/rocketchat/mongodb:/data/db
      #- ./data/dump:/dump
     command: mongod --smallfiles --oplogSize 128 --replSet rs0 --storageEngine=mmapv1
     labels:

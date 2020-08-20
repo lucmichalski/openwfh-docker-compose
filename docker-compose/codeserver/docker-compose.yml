@@ -1,15 +1,9 @@
----
 version: "3"
 services:
   code-server:
     image: linuxserver/code-server
     container_name: code-server
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Americas/New_York
-      - PASSWORD=password #optional
-      - SUDO_PASSWORD=password #optional
+    restart: unless-stopped
     labels:
       - "traefik.enable=true"
       - "traefik.http.middlewares.codeserver-https.redirectscheme.scheme=https"
@@ -21,10 +15,15 @@ services:
       - "traefik.http.routers.codeserver.tls=true"
       - "traefik.http.routers.codeserver.tls.certresolver=${RESOLVER}"
       - "traefik.http.services.codeserver.loadbalancer.server.port=${SERVER_PORT}"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - PASSWORD=${PASSWORD} #optional
+      - SUDO_PASSWORD=${SUDO_PASSWORD} #optional
     volumes:
-      - ../../data/volumes/codeserver/config:/config
-      - ~/degoogle:/config/workspace
-    restart: unless-stopped
+      - /srv/codeserver/config:/config
+      - ~/openwfh-docker-compose:/config/workspace
 networks:
   default:
     external:

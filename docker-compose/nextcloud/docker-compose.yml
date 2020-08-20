@@ -1,15 +1,8 @@
 version: '3'
-
-networks:
-  default:
-    external: 
-      name: traefik_default
-  nextcloud:
-    external: false
-
 services:
   nextcloud:
     image: nextcloud:18.0.4
+    container_name: nextcloud
     labels:
       - "traefik.enable=true"
       - "traefik.http.middlewares.nextcloud-caldav.redirectregex.permanent=true"
@@ -28,37 +21,37 @@ services:
       - nextcloud-db           # If using MySQL
       - redis                  # If using Redis
     environment:
-      - UID=1000
-      - GID=1000
-      - UPLOAD_MAX_SIZE=10G
-      - APC_SHM_SIZE=128M
-      - OPCACHE_MEM_SIZE=128
-      - CRON_PERIOD=15m
-      - TZ=America/New_York
-      - DOMAIN=localhost
-      - DB_TYPE=mysql
-      - DB_NAME=nextcloud
-      - DB_USER=nextcloud
-      - DB_PASSWORD=supersecretpassword
-      - DB_HOST=nextcloud-db
+      - UID=${UID}
+      - GID=${GID}
+      - UPLOAD_MAX_SIZE=${UPLOAD_MAX_SIZE}
+      - APC_SHM_SIZE=${APC_SHM_SIZE}
+      - OPCACHE_MEM_SIZE=${OPCACHE_MEM_SIZE}
+      - CRON_PERIOD=${CRON_PERIOD}
+      - TZ=${TZ}
+      - DOMAIN=${HOSTNAME}
+      - DB_TYPE=${DB_TYPE}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
     volumes:
-      - ../../data/volumes/nextcloud/data:/data
-      - ../../data/volumes/nextcloud/config:/config
-      - ../../data/volumes/nextcloud/apps:/apps2
-      - ../../data/volumes/nextcloud/themes:/nextcloud/themes
+      - /srv/nextcloud/data:/data
+      - /srv/nextcloud/config:/config
+      - /srv/nextcloud/apps:/apps2
+      - /srv/nextcloud/themes:/nextcloud/themes
     networks:
       - default
 
   # If using MySQL
   nextcloud-db:
     image: mariadb
-    volumes:
-      - ../../data/volumes/nextcloud/db:/var/lib/mysql
     environment:
-      - MYSQL_ROOT_PASSWORD=supersecretpassword
-      - MYSQL_DATABASE=nextcloud
-      - MYSQL_USER=nextcloud
-      - MYSQL_PASSWORD=supersecretpassword
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - /srv/nextcloud/mariadb:/var/lib/mysql
     networks:
       - default
     
@@ -67,6 +60,13 @@ services:
     image: redis:alpine
     container_name: redis
     volumes:
-      - ../../data/volumes/nextcloud/redis:/data
+      - /srv/nextcloud/redis:/data
     networks:
       - default
+
+networks:
+  default:
+    external: 
+      name: traefik_default
+  # nextcloud:
+  #   external: false

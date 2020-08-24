@@ -1,23 +1,23 @@
-# OpenWFH - Codeserver
-CodeServer container based on the latest release from the official [CodeServer LinuxServer Image](https://hub.docker.com/r/linuxserver/code-server).
+# OpenWFH - Wiki.js
+Wiki.js container based on the latest release from the official [Wiki.js LinuxServer Image](https://hub.docker.com/r/linuxserver/wikijs).
 
 # Software Overview
-[Code-server](https://coder.com) is VS Code running on a remote server, accessible through the browser.
+[Wiki.js](https://wiki.js.org) A modern, lightweight and powerful wiki app built on NodeJS.
 
 # Deployment Instructions
 ## Prerequisite
 For local develpment:
 - Docker / Docker Desktop (prefferably latest version 19.03)
 
-## Environmental Variables
+## Environmental Variables & Parameters
 - `HOSTNAME` Hostname / Domain URL
 - `RESOLVER` Resolver label for traefik
 - `SERVER_PORT` Web port
 - `PUID` For UserID - see explanation below
 - `PGID` For GroupID - see explanation below
 - `TZ` Specify a timezone
-- `PASSWORD` Optional web gui password, if not provided, there will be no auth.
-- `SUDO_PASSWORD` If this optional variable is set, user will have sudo access in the code-server terminal with the specified password.
+- `/config` Where Wiki.js config is stored.
+- `/data` Where Wiki.js data is stored.
 
 ### User / Group Identifiers
 When using volumes (`-v` flags) permissions issues can arise between the host OS and the container, we avoid this issue by allowing you to specify the user `PUID` and group `PGID`.
@@ -35,9 +35,9 @@ Clone the repo
 ```console
 $ git clone git@github.com:mjtechguy/openwfh-docker-compose.git
 ```
-To run codeserver in container, execute docker-compose command. Make sure to run traefik container first.
+To run wikijs in container, execute docker-compose command. Make sure to run traefik container first.
 ```console
-$ cd docker-compose/codeserver
+$ cd docker-compose/wikijs
 $ docker-compose -f ../traefik/docker-compose.yml up -d && docker-compose up -d
 ```
 Check container status
@@ -46,8 +46,4 @@ $ docker ps
 ```
 
 ## Application Setup
-Access the webui at `HOSTNAME:PORT`. For github integration, drop your ssh key in to `/config/.ssh`. Then open a terminal from the top menu and set your github username and email via the following commands
-```console
-git config --global user.name "username"
-git config --global user.email "email address"
-```
+Access the webui at `HOSTNAME:PORT`.

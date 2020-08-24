@@ -32,20 +32,15 @@ $ cd docker-compose
 $ bash docker.sh
 ```
 
-or to spin up individual container, CD to each directory and run docker-compose. Make sure you are able to run traefik container first.
-```console
-$ cd docker-compose/codeserver # running codeserver as example
-$ docker-compose -f ../traefik/docker-compose.yml up -d && docker-compose up -d
-```
-
 to check container status
 ```console
 $ docker ps
 ```
 
-Access each container URL links specified in the environment variable. For example, `https://codeserver.local.dev`
+Access each container URL links specified in the environment variable.  
+For example, `https://codeserver.local.dev`
 
-**NOTE:** Refer to each container directory README file for details of containers.
+**NOTE:** To spin up individual containers, refer to each container directory README file for instruction.
 
 
 

@@ -4,7 +4,7 @@ services:
     image: gitlab/gitlab-ce:latest
     container_name: "gitlab"
     restart: unless-stopped
-    hostname: 'gitlab.john.openwfh.dev'
+    hostname: '${HOSTNAME}'
     labels:
       - "traefik.enable=true"
       - "traefik.http.middlewares.gitlab-https.redirectscheme.scheme=https"

@@ -9,13 +9,16 @@ Duplicati container based on the latest release from the official [Duplicati Lin
 For local develpment:
 - Docker / Docker Desktop (prefferably latest version 19.03)
 
-## Environmental Variables
+## Environmental Variables & Parameters
 - `HOSTNAME` Hostname / Domain URL
 - `RESOLVER` Resolver label for traefik
 - `SERVER_PORT` Web port
 - `PUID` For UserID - see explanation below
 - `PGID` For GroupID - see explanation below
 - `TZ` Specify a timezone
+- `/config` Contains all relevant configuration files
+- `/backups` Path to store local backups
+- `/source` Path to source for files to backup
 
 ### User / Group Identifiers
 When using volumes (`-v` flags) permissions issues can arise between the host OS and the container, we avoid this issue by allowing you to specify the user `PUID` and group `PGID`.

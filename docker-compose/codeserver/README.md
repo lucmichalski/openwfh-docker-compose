@@ -9,7 +9,7 @@ CodeServer container based on the latest release from the official [CodeServer L
 For local develpment:
 - Docker / Docker Desktop (prefferably latest version 19.03)
 
-## Environmental Variables
+## Environmental Variables & Parameter
 - `HOSTNAME` Hostname / Domain URL
 - `RESOLVER` Resolver label for traefik
 - `SERVER_PORT` Web port
@@ -18,6 +18,8 @@ For local develpment:
 - `TZ` Specify a timezone
 - `PASSWORD` Optional web gui password, if not provided, there will be no auth.
 - `SUDO_PASSWORD` If this optional variable is set, user will have sudo access in the code-server terminal with the specified password.
+- `/config` Contains all relevant configuration files
+- `/config/workspace` Reference directories
 
 ### User / Group Identifiers
 When using volumes (`-v` flags) permissions issues can arise between the host OS and the container, we avoid this issue by allowing you to specify the user `PUID` and group `PGID`.

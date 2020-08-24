@@ -16,8 +16,8 @@ For local develpment:
 - `PUID` For UserID - see explanation below
 - `PGID` For GroupID - see explanation below
 - `TZ` Specify a timezone
-- `/config` Where Wiki.js config is stored.
-- `/data` Where Wiki.js data is stored.
+- `/config` Where Wiki.js config is stored
+- `/data` Where Wiki.js data is stored
 
 ### User / Group Identifiers
 When using volumes (`-v` flags) permissions issues can arise between the host OS and the container, we avoid this issue by allowing you to specify the user `PUID` and group `PGID`.

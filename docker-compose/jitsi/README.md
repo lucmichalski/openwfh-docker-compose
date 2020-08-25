@@ -14,7 +14,7 @@ For local develpment:
 ## Environmental Variables & Parameters
 
 __Configuration__:
-- `HOSTNAME` / `PUBLIC_URL` Hostname / Public URL for the web service
+- `HOSTNAME` / `PUBLIC_URL` - Hostname / Public URL for the web service
 - `RESOLVER` Resolver label for traefik
 - `SERVER_PORT` Web port
 - `TZ` System Time Zone

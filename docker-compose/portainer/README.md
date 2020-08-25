@@ -14,7 +14,6 @@ For local develpment:
 - Docker / Docker Desktop (prefferably latest version 19.03)
 
 ## Environment Variables & Parameters
-__Passbolt Configuration:__:
 - `HOSTNAME` - Hostname / Domain URL
 - `RESOLVER` Resolver label for traefik
 - `SERVER_PORT` Web port

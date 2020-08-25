@@ -12,7 +12,7 @@ For local develpment:
 ## Environment Variables & Parameters
 
 __Nextcloud Configuration__:
-- `HOSTNAME` / DOMAIN - Hostname / Domain to use during the setup
+- `HOSTNAME` / `DOMAIN` - Hostname / Domain to use during the setup
 - `RESOLVER` Resolver label for traefik
 - `TZ` The system/log timezone (default : Etc/UTC)
 - `UID` Nextcloud user id

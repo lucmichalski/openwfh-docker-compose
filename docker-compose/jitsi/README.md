@@ -21,13 +21,13 @@ __Configuration__:
 - `DOCKER_HOST_ADDRESS` IP address of the Docker host, needed for LAN environments
 - `/config` Directory where all configuration will be stored
 
-__Let's Encrypt configuration__:
+__Let's Encrypt configuration__:  
 If you plan on exposing this container setup to the outside traffic directly and want a proper TLS certificate, you are in luck because Let's Encrypt support is built right in. Here are the required options:
 - `ENABLE_LETSENCRYPT` Enable Let's Encrypt certificate generation
 - `LETSENCRYPT_DOMAIN` Domain for which to generate the certificate
 - `LETSENCRYPT_EMAIL` E-Mail for receiving important account notifications (mandatory)
 
-__SIP gateway configuration__:
+__SIP gateway configuration__:  
 If you want to enable the SIP gateway, these options are required:
 - `JIGASI_SIP_URI` SIP URI for incoming / outgoing calls
 - `JIGASI_SIP_PASSWORD` Password for the specified SIP account
@@ -46,13 +46,13 @@ __JItsi BRoadcasting Infrastructure (Jibri) configuration__:
 - `JIBRI_PENDING_TIMEOUT` MUC connection timeout
 - `JIBRI_LOGS_DIR` Directory for logs inside Jibri container
 
-__Authentication__:
+__Authentication__:  
 Authentication can be controlled with the environment variables below. If guest access is enabled, unauthenticated users will need to wait until a user authenticates before they can join a room. If guest access is not enabled, every user will need to authenticate before they can join.
 - `ENABLE_AUTH` Enable authentication
 - `ENABLE_GUESTS` Enable guest access
 - `AUTH_TYPE` Select authentication type (internal, jwt or ldap)
 
-__Authentication using LDAP__:
+__Authentication using LDAP__:  
 You can use LDAP to authenticate users. To enable it you have to enable authentication with ENABLE_AUTH and set AUTH_TYPE to ldap, then configure the settings you can see below.
 - `LDAP_URL` URL for ldap connection
 - `LDAP_BASE` LDAP base DN. Can be empty
@@ -78,11 +78,11 @@ __Authentication using JWT tokens__:
 - `JWT_AUTH_TYPE` (Optional) Controls which module is used for processing incoming JWTs
 - `JWT_TOKEN_AUTH_MODULE` (Optional) Controls which module is used for validating JWTs
 
-__Shared document editing using Etherpad__:
+__Shared document editing using Etherpad__:  
 You can collaboratively edit a document via Etherpad. In order to enable it, set the config options below and run Docker Compose with the additional config file etherpad.yml. Here are the required options:
 - `ETHERPAD_URL_BASE` Set etherpad-lite URL
 
-__Transcription configuration__:
+__Transcription configuration__:  
 If you want to enable the Transcribing function, these options are required:
 - `ENABLE_TRANSCRIPTIONS` - Enable Jigasi transcription in a conference
 - `GC_PROJECT_ID` - `project_id` from Google Cloud Credentials

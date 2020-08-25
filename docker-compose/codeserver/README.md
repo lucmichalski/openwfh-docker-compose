@@ -9,7 +9,7 @@ CodeServer container based on the latest release from the official [CodeServer L
 For local develpment:
 - Docker / Docker Desktop (prefferably latest version 19.03)
 
-## Environmental Variables & Parameter
+## Environment Variables & Parameter
 - `HOSTNAME` Hostname / Domain URL
 - `RESOLVER` Resolver label for traefik
 - `SERVER_PORT` Web port

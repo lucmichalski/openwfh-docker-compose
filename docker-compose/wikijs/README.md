@@ -9,7 +9,7 @@ Wiki.js container based on the latest release from the official [Wiki.js LinuxSe
 For local develpment:
 - Docker / Docker Desktop (prefferably latest version 19.03)
 
-## Environmental Variables & Parameters
+## Environment Variables & Parameters
 - `HOSTNAME` Hostname / Domain URL
 - `RESOLVER` Resolver label for traefik
 - `SERVER_PORT` Web port

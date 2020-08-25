@@ -11,7 +11,7 @@ Jitsi container based on the latest release from the official [Jitsi Github Repo
 For local develpment:
 - Docker / Docker Desktop (prefferably latest version 19.03)
 
-## Environmental Variables & Parameters
+## Environment Variables & Parameters
 
 __Configuration__:
 - `HOSTNAME` / `PUBLIC_URL` Hostname / Public URL for the web service

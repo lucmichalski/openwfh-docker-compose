@@ -15,7 +15,7 @@ For local develpment:
 
 ## Environment Variables & Parameters
 __Passbolt Configuration:__:
-- `HOSTNAME` / `APP_FULL_BASE_URL` - Hostname / Passbolt base url
+- `HOSTNAME` - Hostname / Domain URL
 - `RESOLVER` Resolver label for traefik
 - `SERVER_PORT` Web port
 - `TZ` System timezone

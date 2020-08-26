@@ -10,7 +10,7 @@ For local develpment:
 - Docker / Docker Desktop (prefferably latest version 19.03)
 
 ## Environment Variables & Parameters
-__Zulip Configuration:__:
+__Zulip Configuration__:
 - `HOSTNAME` Hostname / Domain URL
 - `RESOLVER` Resolver label for traefik
 - `SERVER_PORT` Web port
@@ -38,7 +38,7 @@ __Zulip Configuration:__:
 - `ZULIP_AUTH_BACKENDS` Specify authentication backends
 - `/data` Zulip data
 
-__Posgres:__:
+__Posgres__:
 - `POSTGRES_PASSWORD` Posgres password
 - `/var/lib/postgresql/data` Postgres data
 

@@ -38,8 +38,8 @@ __Zulip Configuration__:
 - `ZULIP_AUTH_BACKENDS` Specify authentication backends
 - `/data` Zulip data
 
-__Posgres__:
-- `POSTGRES_PASSWORD` Posgres password
+__Postgres__:
+- `POSTGRES_PASSWORD` Postgres password
 - `/var/lib/postgresql/data` Postgres data
 
 __Memcached__:

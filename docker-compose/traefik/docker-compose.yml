@@ -41,7 +41,7 @@ services:
       - "--certificatesresolvers.myresolver.acme.storage=/acme.json"
       - "--providers.docker.endpoint=tcp://dockerproxy:2375"
       # Disable SSL verification on backend
-      - "--serverstransport.insecureskipverify=true"
+      # - "--serverstransport.insecureskipverify=true"
     ports:
       - "80:80"
       - "443:443"
@@ -53,9 +53,9 @@ services:
     secrets:
       - "cf_api_email"
       - "cf_api_key"
-    # environment:
-    #   - "CF_API_EMAIL_FILE=/run/secrets/cf_api_email"
-    #   - "CF_API_KEY_FILE=/run/secrets/cf_api_key"
+    environment:
+      - "CF_API_EMAIL_FILE=/run/secrets/cf_api_email"
+      - "CF_API_KEY_FILE=/run/secrets/cf_api_key"
     volumes:
       - ./acme.json:/acme.json
       - ./tmp:/tmp

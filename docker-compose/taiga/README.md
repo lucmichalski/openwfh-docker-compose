@@ -29,12 +29,12 @@ __Certificates__:
 - `CERT_NAME` - Name of certificate file. Default is fullchain.pem.
 - `CERT_KEY` - Name of certificate key file. Default is privkey.pem.
 
-__Posgres__:
+__Postgres__:
 - `POSTGRES_HOST` - PostgeSQL hostname. Default is db service.
 - `POSTGRES_DB` - Database name.
 - `POSTGRES_USER` - PostgreSQL username.
 - `POSTGRES_PASSWORD` - PostgreSQL password.
-- `/var/lib/postgresql/data` - Posgres data
+- `/var/lib/postgresql/data` - PostgreSQL data
 
 __Rabbit Configuration__:
 - `RABBIT_HOST` - RabbitMQ hostname. Default is rabbit service.

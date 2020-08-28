@@ -1,0 +1,192 @@
+version: '2.1'
+
+# networks:
+#   monitor-net:
+#     driver: bridge
+
+# volumes:
+#     prometheus_data: {}
+#     grafana_data: {}
+
+services:
+
+  prometheus:
+    image: prom/prometheus:v2.20.0
+    container_name: prometheus
+    restart: unless-stopped
+    volumes:
+      - /srv/dockprom/prometheus/config:/etc/prometheus
+      # - /srv/dockprom/prometheus/data:/prometheus
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    # expose:
+    #   - 9090
+    networks:
+      - default
+    labels:
+      # org.label-schema.group: "monitoring"
+      - "org.label-schema.group=monitoring"
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.prometheus-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.prometheus-http.entrypoints=web"
+      - "traefik.http.routers.prometheus-http.rule=Host(`${PROMETHEUS_HOSTNAME}`)"
+      - "traefik.http.routers.prometheus-http.middlewares=prometheus-https@docker"
+      - "traefik.http.routers.prometheus.entrypoints=websecure"
+      - "traefik.http.routers.prometheus.rule=Host(`${PROMETHEUS_HOSTNAME}`)"
+      - "traefik.http.routers.prometheus.tls=true"
+      - "traefik.http.routers.prometheus.tls.certresolver=${RESOLVER}"
+      - "traefik.http.services.prometheus.loadbalancer.server.port=${PROMETHEUS_PORT}"
+
+  alertmanager:
+    image: prom/alertmanager:v0.21.0
+    container_name: alertmanager
+    restart: unless-stopped
+    volumes:
+      - /srv/dockprom/alertmanager/config:/etc/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+    # expose:
+    #   - 9093
+    networks:
+      - default
+    labels:
+      # org.label-schema.group: "monitoring"
+      - "org.label-schema.group=monitoring"
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.alertmanager-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.alertmanager-http.entrypoints=web"
+      - "traefik.http.routers.alertmanager-http.rule=Host(`${ALERTMANAGER_HOSTNAME}`)"
+      - "traefik.http.routers.alertmanager-http.middlewares=alertmanager-https@docker"
+      - "traefik.http.routers.alertmanager.entrypoints=websecure"
+      - "traefik.http.routers.alertmanager.rule=Host(`${ALERTMANAGER_HOSTNAME}`)"
+      - "traefik.http.routers.alertmanager.tls=true"
+      - "traefik.http.routers.alertmanager.tls.certresolver=${RESOLVER}"
+      - "traefik.http.services.alertmanager.loadbalancer.server.port=${ALERTMANAGER_PORT}"
+
+  nodeexporter:
+    image: prom/node-exporter:v1.0.1
+    container_name: nodeexporter
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points=^/(sys|proc|dev|host|etc)($$|/)'
+    restart: unless-stopped
+    expose:
+      - 9100
+    networks:
+      - default
+    labels:
+      org.label-schema.group: "monitoring"
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.37.0
+    container_name: cadvisor
+    restart: unless-stopped
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker:/var/lib/docker:ro
+      #- /cgroup:/cgroup:ro #doesn't work on MacOS only for Linux
+    ports:
+      - '8001:8080'
+    expose:
+      - 8001
+    networks:
+      - default
+    labels:
+      org.label-schema.group: "monitoring"
+
+  grafana:
+    image: grafana/grafana:7.1.1
+    container_name: grafana
+    volumes:
+      # - /srv/dockprom/grafana/data:/var/lib/grafana
+      - grafana_data:/var/lib/grafana
+      - /srv/dockprom/grafana/provisioning:/etc/grafana/provisioning
+    environment:
+      # - GF_SECURITY_ADMIN_USER=${ADMIN_USER:-admin}
+      # - GF_SECURITY_ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+      - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: unless-stopped
+    # expose:
+    #   - 3000
+    networks:
+      - default
+    labels:
+      # org.label-schema.group: "monitoring"
+      - "org.label-schema.group=monitoring"
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.grafana-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.grafana-http.entrypoints=web"
+      - "traefik.http.routers.grafana-http.rule=Host(`${GRAFANA_HOSTNAME}`)"
+      - "traefik.http.routers.grafana-http.middlewares=grafana-https@docker"
+      - "traefik.http.routers.grafana.entrypoints=websecure"
+      - "traefik.http.routers.grafana.rule=Host(`${GRAFANA_HOSTNAME}`)"
+      - "traefik.http.routers.grafana.tls=true"
+      - "traefik.http.routers.grafana.tls.certresolver=${RESOLVER}"
+      - "traefik.http.services.grafana.loadbalancer.server.port=${GRAFANA_PORT}"
+
+  pushgateway:
+    image: prom/pushgateway:v1.2.0
+    container_name: pushgateway
+    restart: unless-stopped
+    # expose:
+    #   - 9091
+    networks:
+      - default
+    labels:
+      # org.label-schema.group: "monitoring"
+      - "org.label-schema.group=monitoring"
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.dockprom-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.dockprom-http.entrypoints=web"
+      - "traefik.http.routers.dockprom-http.rule=Host(`${PUSHGATEWAY_HOSTNAME}`)"
+      - "traefik.http.routers.dockprom-http.middlewares=dockprom-https@docker"
+      - "traefik.http.routers.dockprom.entrypoints=websecure"
+      - "traefik.http.routers.dockprom.rule=Host(`${PUSHGATEWAY_HOSTNAME}`)"
+      - "traefik.http.routers.dockprom.tls=true"
+      - "traefik.http.routers.dockprom.tls.certresolver=${RESOLVER}"
+      - "traefik.http.services.dockprom.loadbalancer.server.port=${PUSHGATEWAY_PORT}"
+
+  # caddy:
+  #   image: stefanprodan/caddy
+  #   container_name: caddy
+  #   ports:
+  #     - "3000:3000"
+  #     - "9090:9090"
+  #     - "9093:9093"
+  #     - "9091:9091"
+  #   volumes:
+  #     - ./caddy:/etc/caddy
+  #   environment:
+  #     - ADMIN_USER=${ADMIN_USER:-admin}
+  #     - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+  #   restart: unless-stopped
+  #   networks:
+  #     - default
+  #   labels:
+  #     org.label-schema.group: "monitoring"
+
+volumes:
+  prometheus_data: {}
+  grafana_data: {}
+  
+networks:
+  default:
+    external:
+        name: traefik_default

@@ -25,12 +25,12 @@ For local develpment:
 - `GF_USERS_ALLOW_SIGN_UP` Grafana allow user to sign up
 
 ### Configuration files
-__Prometheus__:
+__Prometheus__:  
 See given example under `./prometheus/`
 - `alert.rules` Three alert groups setup: Monitoring services alerts targets, Docker Host alerts host and Docker Containers alerts containers
 - `prometheus.yml` Prometheus config file 
 
-__Grafana__:
+__Grafana__:  
 See given example under `./grafana/`
 - `datasource.yml` Grafana datasource config
 - `dashboard.yml` Grafana dashboard config
@@ -39,7 +39,7 @@ See given example under `./grafana/`
 - `monitor_services.json` Monitoring services metrics
 - `nginx_container.json` Nginx exporter metrics
 
-__Alertmanager__:
+__Alertmanager__:  
 See given example under `./alertmanager/`
 - `config.yml` Config file to connect to slack account for alerts
 

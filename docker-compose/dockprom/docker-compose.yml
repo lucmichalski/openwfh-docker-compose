@@ -4,10 +4,6 @@ version: '2.1'
 #   monitor-net:
 #     driver: bridge
 
-# volumes:
-#     prometheus_data: {}
-#     grafana_data: {}
-
 services:
 
   prometheus:

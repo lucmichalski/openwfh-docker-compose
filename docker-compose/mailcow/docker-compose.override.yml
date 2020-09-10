@@ -1,0 +1,40 @@
+version: '2.1'
+
+services:
+  nginx-mailcow:
+    expose:
+      - 8082
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.mailcow-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.mailcow-http.entrypoints=web"
+      - "traefik.http.routers.mailcow-http.rule=Host(`${MAILCOW_HOSTNAME}`)"
+      - "traefik.http.routers.mailcow-http.middlewares=mailcow-https@docker"
+      - "traefik.http.routers.mailcow.entrypoints=websecure"
+      - "traefik.http.routers.mailcow.rule=Host(`${MAILCOW_HOSTNAME}`)"
+      - "traefik.http.routers.mailcow.tls=true"
+      - "traefik.http.routers.mailcow.tls.certresolver=${RESOLVER}"
+      - "traefik.http.services.mailcow.loadbalancer.server.port=${SERVER_PORT}"
+      - "traefik.docker.network=traefik_default"
+    networks:
+      - default
+
+  certdumper:
+      image: humenius/traefik-certs-dumper
+      network_mode: none
+      command: --restart-containers mailcowdockerized_postfix-mailcow_1,mailcowdockerized_dovecot-mailcow_1,mailcowdockerized_nginx-mailcow_1
+      volumes:
+        - ../traefik:/traefik:ro
+        - /var/run/docker.sock:/var/run/docker.sock:ro
+        - ./data/assets/ssl:/output:rw
+      environment:
+        - DOMAIN=${MAILCOW_HOSTNAME}
+        # If using wildcard certs instead of an explicit host cert,
+        # use following line instead with just the TLD so certdumper
+        # is able to find the cert.
+        # - DOMAIN=YourDomain.com
+
+networks:
+  default:
+    external:
+      name: traefik_default

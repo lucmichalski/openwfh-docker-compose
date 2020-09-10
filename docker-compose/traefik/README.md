@@ -36,4 +36,4 @@ $ docker ps
 ```
 
 ## Application Setup
-Access the webui at `HOSTNAME:PORT`.
+Access the webui at `SERVER_IP:PORT`.

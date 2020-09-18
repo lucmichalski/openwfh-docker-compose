@@ -62,6 +62,8 @@ Access the webui at `HOSTNAME`.
 ## Database backup
 Added container that backup the database for nextcloud.  
 *If you are trying to backup a database that doesn't have a user or a password (you should!) make sure you set `CONTAINER_ENABLE_DOCKER_SECRETS=FALSE`*
+
+__DB backup parameters__:
 - `DB_TYPE` Type of DB Server to backup e.g. `mysql`
 - `DB_HOST` Server Hostname
 - `DB_NAME` Schema Name

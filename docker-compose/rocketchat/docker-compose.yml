@@ -36,8 +36,6 @@ services:
 #       - HTTPS_PROXY=http://proxy.domain.com
     depends_on:
       - mongo
-    # ports:
-    #   - 3000:3000
     networks:
       - default
 
@@ -70,6 +68,27 @@ services:
         done; (exit $$s)"
     depends_on:
       - mongo
+    networks:
+      - default
+
+  rocketchat-db-backup:
+    image: tiredofit/db-backup
+    container_name: rocketchat-db-backup
+    links:
+      - mongo
+    volumes:
+      - /srv/db_backups/rocketchat:/backup
+      - /srv/db_backups/script/post-script.sh:/assets/custom-scripts/post-script.sh
+    environment:
+      - DB_TYPE=mongo
+      - DB_HOST=mongo
+      - DB_DUMP_FREQ=1440
+      - DB_DUMP_BEGIN=0000
+      - DB_CLEANUP_TIME=8640
+      - MD5=TRUE
+      - COMPRESSION=GZ
+      - SPLIT_DB=FALSE
+    restart: always
     networks:
       - default
 

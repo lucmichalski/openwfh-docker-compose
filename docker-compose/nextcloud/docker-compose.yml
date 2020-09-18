@@ -35,16 +35,17 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_HOST=${DB_HOST}
     volumes:
-      - /srv/nextcloud/data:/data
-      - /srv/nextcloud/config:/config
-      - /srv/nextcloud/apps:/apps2
-      - /srv/nextcloud/themes:/nextcloud/themes
+      - /srv/nextcloud/data:/var/www/html
+      - /srv/nextcloud/config:/var/www/html/config
+      - /srv/nextcloud/apps:/var/www/html/custom_apps
+      - /srv/nextcloud/themes:/var/www/html/themes/custom_theme
     networks:
       - default
 
   # If using MySQL
   nextcloud-db:
     image: mariadb
+    container_name: nextcloud-db
     environment:
       - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
       - MYSQL_DATABASE=${MYSQL_DATABASE}
@@ -61,6 +62,30 @@ services:
     container_name: redis
     volumes:
       - /srv/nextcloud/redis:/data
+    networks:
+      - default
+
+  nextcloud-db-backup:
+    container_name: nextcloud-db-backup
+    image: tiredofit/db-backup
+    links:
+      - nextcloud-db
+    volumes:
+      - /srv/db_backups/nextcloud:/backup
+      - /srv/db_backups/script/post-script.sh:/assets/custom-scripts/post-script.sh
+    environment:
+      - DB_TYPE=${DB_TYPE}
+      - DB_HOST=${DB_HOST}
+      - DB_NAME=${MYSQL_DATABASE}
+      - DB_USER=${MYSQL_USER}
+      - DB_PASS=${MYSQL_ROOT_PASSWORD}
+      - DB_DUMP_FREQ=1440
+      - DB_DUMP_BEGIN=0000
+      - DB_CLEANUP_TIME=8640
+      - MD5=TRUE
+      - COMPRESSION=GZ
+      - SPLIT_DB=FALSE
+    restart: always
     networks:
       - default
 

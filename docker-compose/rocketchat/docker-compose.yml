@@ -1,20 +1,21 @@
 version: '2'
-
 services:
   rocketchat:
     image: rocketchat/rocket.chat:latest
+    container_name: rocketchat
+    restart: unless-stopped
     labels:
       - "traefik.enable=true"
       - "traefik.http.middlewares.rocketchat-https.redirectscheme.scheme=https"
       - "traefik.http.routers.rocketchat-http.entrypoints=web"
-      - "traefik.http.routers.rocketchat-http.rule=Host(`rocketchat.docker.guru`)"
+      - "traefik.http.routers.rocketchat-http.rule=Host(`${HOSTNAME}`)"
       - "traefik.http.routers.rocketchat-http.middlewares=rocketchat-https@docker"
       - "traefik.http.routers.rocketchat.entrypoints=websecure"
-      - "traefik.http.routers.rocketchat.rule=Host(`rocketchat.docker.guru`)"
+      - "traefik.http.routers.rocketchat.rule=Host(`${HOSTNAME}`)"
       - "traefik.http.routers.rocketchat.tls=true"
-      - "traefik.http.routers.rocketchat.tls.certresolver=myresolver"
-      - "traefik.http.services.rocketchat.loadbalancer.server.port=3000"
-      - "traefik.docker.network=traefik_default"
+      - "traefik.http.routers.rocketchat.tls.certresolver=${RESOLVER}"
+      - "traefik.http.services.rocketchat.loadbalancer.server.port=${SERVER_PORT}"
+      #- "traefik.docker.network=traefik_default"
     command: >
       bash -c
         "for i in `seq 1 30`; do
@@ -23,21 +24,18 @@ services:
           echo \"Tried $$i times. Waiting 5 secs...\";
           sleep 5;
         done; (exit $$s)"
-    restart: unless-stopped
     volumes:
-      - ./uploads:/app/uploads
+      - /srv/rocketchat/data:/app/uploads
     environment:
-      - PORT=3000
-      - ROOT_URL=http://rocketchat.docker.guru
-      - MONGO_URL=mongodb://mongo:27017/rocketchat
-      - MONGO_OPLOG_URL=mongodb://mongo:27017/local
-      - MAIL_URL=smtp://smtp.email
+      - PORT=${SERVER_PORT}
+      - ROOT_URL=http://${HOSTNAME}
+      - MONGO_URL=${MONGO_URL}
+      - MONGO_OPLOG_URL=${MONGO_OPLOG_URL}
+      - MAIL_URL=${MAIL_URL}
 #       - HTTP_PROXY=http://proxy.domain.com
 #       - HTTPS_PROXY=http://proxy.domain.com
     depends_on:
       - mongo
-    ports:
-      - 3000:3000
     networks:
       - default
 
@@ -45,7 +43,7 @@ services:
     image: mongo:4.0
     restart: unless-stopped
     volumes:
-     - ./data/db:/data/db
+     - /srv/rocketchat/mongodb:/data/db
      #- ./data/dump:/dump
     command: mongod --smallfiles --oplogSize 128 --replSet rs0 --storageEngine=mmapv1
     labels:
@@ -70,6 +68,27 @@ services:
         done; (exit $$s)"
     depends_on:
       - mongo
+    networks:
+      - default
+
+  rocketchat-db-backup:
+    image: tiredofit/db-backup
+    container_name: rocketchat-db-backup
+    links:
+      - mongo
+    volumes:
+      - /srv/db_backups/rocketchat:/backup
+      - /srv/db_backups/script/post-script.sh:/assets/custom-scripts/post-script.sh
+    environment:
+      - DB_TYPE=${DB_TYPE}
+      - DB_HOST=${DB_HOST}
+      - DB_DUMP_FREQ=${DB_DUMP_FREQ}
+      - DB_DUMP_BEGIN=${DB_DUMP_BEGIN}
+      - DB_CLEANUP_TIME=${DB_CLEANUP_TIME}
+      - MD5=${MD5}
+      - COMPRESSION=${COMPRESSION}
+      - SPLIT_DB=${SPLIT_DB}
+    restart: always
     networks:
       - default
 
@@ -100,24 +119,3 @@ networks:
   # # this is used to expose the hubot port for notifications on the host on port 3001, e.g. for hubot-jenkins-notifier
   #   ports:
   #     - 3001:8080
-
-  #traefik:
-  #  image: traefik:latest
-  #  restart: unless-stopped
-  #  command: >
-  #    traefik
-  #     --docker
-  #     --acme=true
-  #     --acme.domains='your.domain.tld'
-  #     --acme.email='your@email.tld'
-  #     --acme.entrypoint=https
-  #     --acme.storagefile=acme.json
-  #     --defaultentrypoints=http
-  #     --defaultentrypoints=https
-  #     --entryPoints='Name:http Address::80 Redirect.EntryPoint:https'
-  #     --entryPoints='Name:https Address::443 TLS.Certificates:'
-  #  ports:
-  #    - 80:80
-  #    - 443:443
-  #  volumes:
-  #    - /var/run/docker.sock:/var/run/docker.sock

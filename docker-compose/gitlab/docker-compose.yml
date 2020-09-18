@@ -1,0 +1,38 @@
+version: '3'
+services:
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    container_name: "gitlab"
+    restart: unless-stopped
+    hostname: '${HOSTNAME}'
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.gitlab-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.gitlab-http.entrypoints=web"
+      - "traefik.http.routers.gitlab-http.rule=Host(`${HOSTNAME}`)"
+      - "traefik.http.routers.gitlab-http.middlewares=gitlab-https@docker"
+      - "traefik.http.routers.gitlab.entrypoints=websecure"
+      - "traefik.http.routers.gitlab.rule=Host(`${HOSTNAME}`)"
+      - "traefik.http.routers.gitlab.tls=true"
+      - "traefik.http.routers.gitlab.tls.certresolver=${RESOLVER}"
+      - "traefik.http.services.gitlab.loadbalancer.server.port=${SERVER_PORT}"
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'https://${HOSTNAME}'
+        nginx['listen_port'] = 80
+        nginx['listen_https'] = false
+    #    unicorn['worker_timeout'] = 120
+    #    unicorn['worker_processes'] = 2
+
+    #ports:
+    #  - 80:80
+    #  - 443:443
+    #  - 22:22
+    volumes:
+      - /srv/gitlab/config:/etc/gitlab
+      - /srv/gitlab/logs:/var/log/gitlab
+      - /srv/gitlab/data:/var/opt/gitlab
+networks:
+  default:
+    external:
+        name: traefik_default

@@ -1,15 +1,8 @@
 version: '3'
-
-networks:
-  default:
-    external: 
-      name: traefik_default
-  nextcloud:
-    external: false
-
 services:
   nextcloud:
     image: nextcloud:18.0.4
+    container_name: nextcloud
     labels:
       - "traefik.enable=true"
       - "traefik.http.middlewares.nextcloud-caldav.redirectregex.permanent=true"
@@ -17,48 +10,49 @@ services:
       - "traefik.http.middlewares.nextcloud-caldav.redirectregex.replacement=https://$${1}/remote.php/dav/"
       - "traefik.http.middlewares.nextcloud-https.redirectscheme.scheme=https"
       - "traefik.http.routers.nextcloud-http.entrypoints=web"
-      - "traefik.http.routers.nextcloud-http.rule=Host(`nextcloud.docker.guru`)"
+      - "traefik.http.routers.nextcloud-http.rule=Host(`${HOSTNAME}`)"
       - "traefik.http.routers.nextcloud-http.middlewares=nextcloud-https@docker"
       - "traefik.http.routers.nextcloud.entrypoints=websecure"
-      - "traefik.http.routers.nextcloud.rule=Host(`nextcloud.docker.guru`)"
+      - "traefik.http.routers.nextcloud.rule=Host(`${HOSTNAME}`)"
       - "traefik.http.routers.nextcloud.middlewares=nextcloud-caldav@docker"
       - "traefik.http.routers.nextcloud.tls=true"
-      - "traefik.http.routers.nextcloud.tls.certresolver=myresolver"
+      - "traefik.http.routers.nextcloud.tls.certresolver=${RESOLVER}"
     depends_on:
       - nextcloud-db           # If using MySQL
       - redis                  # If using Redis
     environment:
-      - UID=1000
-      - GID=1000
-      - UPLOAD_MAX_SIZE=10G
-      - APC_SHM_SIZE=128M
-      - OPCACHE_MEM_SIZE=128
-      - CRON_PERIOD=15m
-      - TZ=America/New_York
-      - DOMAIN=localhost
-      - DB_TYPE=mysql
-      - DB_NAME=nextcloud
-      - DB_USER=nextcloud
-      - DB_PASSWORD=supersecretpassword
-      - DB_HOST=nextcloud-db
+      - UID=${UID}
+      - GID=${GID}
+      - UPLOAD_MAX_SIZE=${UPLOAD_MAX_SIZE}
+      - APC_SHM_SIZE=${APC_SHM_SIZE}
+      - OPCACHE_MEM_SIZE=${OPCACHE_MEM_SIZE}
+      - CRON_PERIOD=${CRON_PERIOD}
+      - TZ=${TZ}
+      - DOMAIN=${HOSTNAME}
+      - DB_TYPE=${DB_TYPE}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
     volumes:
-      - ../../data/volumes/nextcloud/data:/data
-      - ../../data/volumes/nextcloud/config:/config
-      - ../../data/volumes/nextcloud/apps:/apps2
-      - ../../data/volumes/nextcloud/themes:/nextcloud/themes
+      - /srv/nextcloud/data:/var/www/html
+      - /srv/nextcloud/config:/var/www/html/config
+      - /srv/nextcloud/apps:/var/www/html/custom_apps
+      - /srv/nextcloud/themes:/var/www/html/themes/custom_theme
     networks:
       - default
 
   # If using MySQL
   nextcloud-db:
     image: mariadb
-    volumes:
-      - ../../data/volumes/nextcloud/db:/var/lib/mysql
+    container_name: nextcloud-db
     environment:
-      - MYSQL_ROOT_PASSWORD=supersecretpassword
-      - MYSQL_DATABASE=nextcloud
-      - MYSQL_USER=nextcloud
-      - MYSQL_PASSWORD=supersecretpassword
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - /srv/nextcloud/mariadb:/var/lib/mysql
     networks:
       - default
     
@@ -67,6 +61,37 @@ services:
     image: redis:alpine
     container_name: redis
     volumes:
-      - ../../data/volumes/nextcloud/redis:/data
+      - /srv/nextcloud/redis:/data
     networks:
       - default
+
+  nextcloud-db-backup:
+    container_name: nextcloud-db-backup
+    image: tiredofit/db-backup
+    links:
+      - nextcloud-db
+    volumes:
+      - /srv/db_backups/nextcloud:/backup
+      - /srv/db_backups/script/post-script.sh:/assets/custom-scripts/post-script.sh
+    environment:
+      - DB_TYPE=${DB_TYPE}
+      - DB_HOST=${DB_HOST}
+      - DB_NAME=${MYSQL_DATABASE}
+      - DB_USER=${MYSQL_USER}
+      - DB_PASS=${MYSQL_ROOT_PASSWORD}
+      - DB_DUMP_FREQ=${DB_DUMP_FREQ}
+      - DB_DUMP_BEGIN=${DB_DUMP_BEGIN}
+      - DB_CLEANUP_TIME=${DB_CLEANUP_TIME}
+      - MD5=${MD5}
+      - COMPRESSION=${COMPRESSION}
+      - SPLIT_DB=${SPLIT_DB}
+    restart: always
+    networks:
+      - default
+
+networks:
+  default:
+    external: 
+      name: traefik_default
+  # nextcloud:
+  #   external: false

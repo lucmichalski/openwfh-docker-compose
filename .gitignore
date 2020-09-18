@@ -1,0 +1,3 @@
+#ENVIRONMENT VARIABLES
+# will exclude all .env files in each directory
+.env

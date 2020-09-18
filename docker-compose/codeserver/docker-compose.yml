@@ -1,30 +1,29 @@
----
 version: "3"
 services:
   code-server:
     image: linuxserver/code-server
     container_name: code-server
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Americas/New_York
-      - PASSWORD=password #optional
-      - SUDO_PASSWORD=password #optional
+    restart: unless-stopped
     labels:
       - "traefik.enable=true"
       - "traefik.http.middlewares.codeserver-https.redirectscheme.scheme=https"
       - "traefik.http.routers.codeserver-http.entrypoints=web"
-      - "traefik.http.routers.codeserver-http.rule=Host(`codeserver.docker.guru`)"
+      - "traefik.http.routers.codeserver-http.rule=Host(`${HOSTNAME}`)"
       - "traefik.http.routers.codeserver-http.middlewares=codeserver-https@docker"
       - "traefik.http.routers.codeserver.entrypoints=websecure"
-      - "traefik.http.routers.codeserver.rule=Host(`codeserver.docker.guru`)"
+      - "traefik.http.routers.codeserver.rule=Host(`${HOSTNAME}`)"
       - "traefik.http.routers.codeserver.tls=true"
-      - "traefik.http.routers.codeserver.tls.certresolver=myresolver"
-      - "traefik.http.services.codeserver.loadbalancer.server.port=8443"
+      - "traefik.http.routers.codeserver.tls.certresolver=${RESOLVER}"
+      - "traefik.http.services.codeserver.loadbalancer.server.port=${SERVER_PORT}"
+    environment:
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      - PASSWORD=${PASSWORD} #optional
+      - SUDO_PASSWORD=${SUDO_PASSWORD} #optional
     volumes:
-      - ../../data/volumes/codeserver/config:/config
-      - ~/degoogle:/config/workspace
-    restart: unless-stopped
+      - /srv/codeserver/config:/config
+      - ~/openwfh-docker-compose:/config/workspace
 networks:
   default:
     external:

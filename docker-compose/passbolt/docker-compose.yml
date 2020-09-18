@@ -1,0 +1,82 @@
+version: '3.4'
+services:
+  passbolt-db:
+    image: mariadb:10.3
+    container_name: passbolt-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    volumes:
+      - /srv/passbolt/mariadb:/var/lib/mysql
+    networks:
+      - default
+
+  passbolt:
+    image: passbolt/passbolt:2.13.5-debian
+    container_name: passbolt
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.passbolt-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.passbolt-http.entrypoints=web"
+      - "traefik.http.routers.passbolt-http.rule=Host(`${HOSTNAME}`)"
+      - "traefik.http.routers.passbolt-http.middlewares=passbolt-https@docker"
+      - "traefik.http.routers.passbolt.entrypoints=websecure"
+      - "traefik.http.routers.passbolt.rule=Host(`${HOSTNAME}`)"
+      - "traefik.http.routers.passbolt.tls=true"
+      - "traefik.http.routers.passbolt.tls.certresolver=${RESOLVER}"
+      - "traefik.http.services.passbolt.loadbalancer.server.port=${SERVER_PORT}"
+    tty: true
+    depends_on:
+      - passbolt-db
+    environment:
+      - APP_FULL_BASE_URL=${APP_FULL_BASE_URL}
+      - PASSBOLT_REGISTRATION_PUBLIC=${PASSBOLT_REGISTRATION_PUBLIC}
+      - DATASOURCES_DEFAULT_HOST=${DATASOURCES_DEFAULT_HOST}
+      - DATASOURCES_DEFAULT_USERNAME=${DATASOURCES_DEFAULT_USERNAME}
+      - DATASOURCES_DEFAULT_PASSWORD=${DATASOURCES_DEFAULT_PASSWORD}
+      - DATASOURCES_DEFAULT_DATABASE=${DATASOURCES_DEFAULT_DATABASE}
+      - DATASOURCES_DEFAULT_PORT=${DATASOURCES_DEFAULT_PORT}
+      - DATASOURCES_QUOTE_IDENTIFIER=${DATASOURCES_QUOTE_IDENTIFIER}
+    volumes:
+      # - /srv/passbolt/config:/var/www/passbolt/config/gpg
+      - gpg_volume:/var/www/passbolt/config/gpg
+      - /srv/passbolt/data:/var/www/passbolt/webroot/img/public
+    tmpfs:
+      - /run
+    command: ["/usr/bin/wait-for.sh", "-t", "0", "db:3306", "--", "/docker-entrypoint.sh"]
+    networks:
+      - default
+
+  passbolt-db-backup:
+    image: tiredofit/db-backup
+    container_name: passbolt-db-backup
+    links:
+      - passbolt-db
+    volumes:
+      - /srv/db_backups/passbolt:/backup
+      - /srv/db_backups/script/post-script.sh:/assets/custom-scripts/post-script.sh
+    environment:
+      - DB_TYPE=${DB_TYPE}
+      - DB_HOST=${DB_HOST}
+      - DB_NAME=${MYSQL_DATABASE}
+      - DB_USER=${MYSQL_USER}
+      - DB_PASS=${MYSQL_PASSWORD}
+      - DB_DUMP_FREQ=${DB_DUMP_FREQ}
+      - DB_DUMP_BEGIN=${DB_DUMP_BEGIN}
+      - DB_CLEANUP_TIME=${DB_CLEANUP_TIME}
+      - MD5=${MD5}
+      - COMPRESSION=${COMPRESSION}
+      - SPLIT_DB=${SPLIT_DB}
+    restart: always
+    networks:
+      - default
+
+volumes:
+  gpg_volume:
+    
+networks:
+  default:
+    external:
+        name: traefik_default

@@ -1,32 +1,31 @@
----
 version: "2.1"
 services:
   duplicati:
     image: linuxserver/duplicati
+    container_name: duplicati
+    restart: unless-stopped
     labels:
       - "traefik.enable=true"
       - "traefik.http.middlewares.duplicati-https.redirectscheme.scheme=https"
       - "traefik.http.routers.duplicati-http.entrypoints=web"
-      - "traefik.http.routers.duplicati-http.rule=Host(`duplicati.docker.guru`)"
+      - "traefik.http.routers.duplicati-http.rule=Host(`${HOSTNAME}`)"
       - "traefik.http.routers.duplicati-http.middlewares=duplicati-https@docker"
       - "traefik.http.routers.duplicati.entrypoints=websecure"
-      - "traefik.http.routers.duplicati.rule=Host(`duplicati.docker.guru`)"
+      - "traefik.http.routers.duplicati.rule=Host(`${HOSTNAME}`)"
       - "traefik.http.routers.duplicati.tls=true"
-      - "traefik.http.routers.duplicati.tls.certresolver=myresolver"
-      - "traefik.http.services.duplicati.loadbalancer.server.port=8200"
-    container_name: duplicati
+      - "traefik.http.routers.duplicati.tls.certresolver=${RESOLVER}"
+      - "traefik.http.services.duplicati.loadbalancer.server.port=${SERVER_PORT}"
     environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Americas/New_York
-      - CLI_ARGS= #optional
+      - PUID=${PUID}
+      - PGID=${PGID}
+      - TZ=${TZ}
+      # - CLI_ARGS= #optional
     volumes:
-      - ../../data/volumes/duplicati/config:/config
-      - ../../:/backups
-      - ../../backups:/source
-    # ports:
-    #   - 8200:8200
-    restart: unless-stopped
+      - /srv/duplicati/config:/config
+      - /srv/duplicati/backups:/backups
+      - /srv/duplicati/source:/source
+    #ports:
+    #  - 8200:8200
 networks:
   default:
     external:

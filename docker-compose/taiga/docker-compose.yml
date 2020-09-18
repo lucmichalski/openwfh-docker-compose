@@ -1,0 +1,81 @@
+version: '3'
+
+services:
+  front:
+    image: dockertaiga/front:5.0.10
+    container_name: taiga-front
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.taiga-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.taiga-http.entrypoints=web"
+      - "traefik.http.routers.taiga-http.rule=Host(`${HOSTNAME}`)"
+      - "traefik.http.routers.taiga-http.middlewares=taiga-https@docker"
+      - "traefik.http.routers.taiga.entrypoints=websecure"
+      - "traefik.http.routers.taiga.rule=Host(`${HOSTNAME}`)"
+      - "traefik.http.routers.taiga.tls=true"
+      - "traefik.http.routers.taiga.tls.certresolver=${RESOLVER}"
+      - "traefik.http.services.taiga.loadbalancer.server.port=${SERVER_PORT}"
+    env_file:
+      - .env
+    volumes:
+      - /srv/taiga/config/front:/taiga-conf
+    networks:
+      - default
+  back:
+    image: dockertaiga/back:5.0.10
+    container_name: taiga-back
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=false"
+    depends_on:
+      - db
+      # - events
+    env_file:
+      - .env
+    volumes:
+      - /srv/taiga/data:/taiga-media
+      - /srv/taiga/config/back:/taiga-conf
+    networks:
+      - default
+  db:
+    image: postgres:11-alpine
+    container_name: taiga-db
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - /srv/taiga/postgres:/var/lib/postgresql/data
+    networks:
+      - default
+  # rabbit:
+  #   image: dockertaiga/rabbit
+  #   container_name: taiga-rabbit
+  #   restart: unless-stopped
+  #   env_file:
+  #     - .env
+  #   networks:
+  #     - default
+  redis:
+    image: bitnami/redis:5.0
+    container_name: taiga-redis
+    env_file:
+      - .env
+    networks:
+      - default
+
+  # events:
+  #   image: dockertaiga/events
+  #   container_name: taiga-events
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - rabbit
+  #   networks:
+  #     - default
+  #   env_file:
+  #     - ./variables.env
+
+networks:
+  default:
+    external:
+      name: traefik_default

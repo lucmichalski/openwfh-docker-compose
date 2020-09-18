@@ -80,14 +80,14 @@ services:
       - /srv/db_backups/rocketchat:/backup
       - /srv/db_backups/script/post-script.sh:/assets/custom-scripts/post-script.sh
     environment:
-      - DB_TYPE=mongo
-      - DB_HOST=mongo
-      - DB_DUMP_FREQ=1440
-      - DB_DUMP_BEGIN=0000
-      - DB_CLEANUP_TIME=8640
-      - MD5=TRUE
-      - COMPRESSION=GZ
-      - SPLIT_DB=FALSE
+      - DB_TYPE=${DB_TYPE}
+      - DB_HOST=${DB_HOST}
+      - DB_DUMP_FREQ=${DB_DUMP_FREQ}
+      - DB_DUMP_BEGIN=${DB_DUMP_BEGIN}
+      - DB_CLEANUP_TIME=${DB_CLEANUP_TIME}
+      - MD5=${MD5}
+      - COMPRESSION=${COMPRESSION}
+      - SPLIT_DB=${SPLIT_DB}
     restart: always
     networks:
       - default

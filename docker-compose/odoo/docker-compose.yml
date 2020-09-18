@@ -1,6 +1,6 @@
 version: '2'
 services:
-  web:
+  odoo:
     image: odoo:12.0
     container_name: odoo
     restart: always
@@ -17,10 +17,12 @@ services:
       - "traefik.http.services.odoo.loadbalancer.server.port=${SERVER_PORT}"
     depends_on:
       - db
-    # ports:
-    #   - "8069:8069"
+    networks:
+      - default
+
   db:
     image: postgres:10
+    container_name: odoo-db
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
@@ -28,6 +30,32 @@ services:
       - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
       - /srv/odoo/postgres:/var/lib/postgresql/data/pgdata
+    networks:
+      - default
+
+  odoo-db-backup:
+    image: tiredofit/db-backup
+    container_name: odoo-db-backup
+    links:
+      - db
+    volumes:
+      - /srv/db_backups/odoo:/backup
+      - /srv/db_backups/script/post-script.sh:/assets/custom-scripts/post-script.sh
+    environment:
+      - DB_TYPE=${DB_TYPE}
+      - DB_HOST=${DB_HOST}
+      - DB_NAME=${POSTGRES_DB}
+      - DB_USER=${POSTGRES_USER}
+      - DB_PASS=${POSTGRES_PASSWORD}
+      - DB_DUMP_FREQ=${DB_DUMP_FREQ}
+      - DB_DUMP_BEGIN=${DB_DUMP_BEGIN}
+      - DB_CLEANUP_TIME=${DB_CLEANUP_TIME}
+      - MD5=${MD5}
+      - COMPRESSION=${COMPRESSION}
+      - SPLIT_DB=${SPLIT_DB}
+    restart: always
+    networks:
+      - default
 
 networks:
   default:

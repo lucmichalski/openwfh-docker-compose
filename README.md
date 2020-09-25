@@ -25,11 +25,11 @@ The current software projects included in the stack:
 - Taiga
 - Jitsi
 - Wikijs
-- Duplicati
 - Passbolt
 - Traefik
 - Duplicati
 - Portainer
+- More to come
 
 ## Deployment Philosophy
 All deployable components should be containerized and easily scalable. Databases, caching, etc should not be shared across components. This may result in multiple MySQL (or similar) databases running in a stack of deployed apps, but also means that one database going offline does not affect other running services.

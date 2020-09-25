@@ -92,11 +92,14 @@ We are looking for contributors. If you have expertise running any of the softwa
 
 Our team is just 2 people at this time.
 
-Mike 'MJ' Johnson - A DevOps engineer based near DC.
+**Mike 'MJ' Johnson** - A DevOps engineer based near DC.
+
 Github: https://github.com/mjtechguy
+
 Twitter: https://twitter.com/mjtechguy
 
-John Rey Tanquinco - A DevOps engineer based in the Phillipines
+**John Rey Tanquinco** - A DevOps engineer based in the Phillipines
+
 Github: https://github.com/johnreytanquinco
 
 

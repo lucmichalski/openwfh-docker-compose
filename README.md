@@ -44,6 +44,7 @@ For local develpment:
 
 For running all software in the cloud
 - A machine with at least 2CPU and 4GB of RAM. Preferrably 4CPU and 8GB. (Need a server? Use our affiliate link to get $100 credit on DigitalOcean: https://m.do.co/c/4904904f3ee0)
+- Cloudflare for DNS (we use and reference Cloudflare here. The API configs for DNS record manipulation is for Cloudflare. You will need to modify the Traefik config if you wish to use another provider.)
 - Docker
 - Docker-Compose
 - Enough disk space for storing container volumes and backups
@@ -57,20 +58,23 @@ Please check back often as we will be elaborating on these instructions and well
 ## Initial Deployment
 We chose Traefik as the reverse proxy/ingress controller for our deployment. You will need to do some configuration of Traefik to work with your DNS provider so that Let's Encrypt certs can be automatically generated for your deployments. We will have a video and additional instructions out for that in the coming weeks.
 
-Clone the repo:
+1. Clone the repo:
 ```console
 $ git clone https://github.com/openwfh/openwfh-docker-compose.git
 ```
-
-Once you have modified the variable files for all components, you can bring up each compose stack individually using `docker-compose up -d` in each directory, or you can run them all at once (DO THIS AT YOUR OWN RISK :))
-
-To spin up all containers, change directory and run the script
+2. `cd docker-compose` and `cp example.env .env`.
+3. `nano docker-compose` and update with your cloudflare email.
+4. `touch acme.json` and `chmod 0600 acme.json`
+5. `cd secrets` and `cp cf_api_email.secret.example cf_api_email.secret` and `cp cf_api_key.secret.example cf_api_key.secret`
+6. `nano cf_api_email.secret` and update your email and `nano cf_api_key.secret` and update your key.
+7. `cd ../` and `docker-compose up -d` to bring up Traefik
+8. Once you have modified the variable files for all components in their respective directories, you can bring up each compose stack individually using `docker-compose up -d` in each directory, or you can run them all at once (DO THIS AT YOUR OWN RISK :))
+9. To spin up all containers, change directory and run the script
 ```console
 $ cd docker-compose
 $ bash docker.sh
 ```
-
-to check container status
+10. To check container status
 ```console
 $ docker ps
 ```

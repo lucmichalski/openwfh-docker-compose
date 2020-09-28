@@ -1,7 +1,8 @@
+# This file maps all local volumes to the same folder as the docker-compose file. This is used for local development where /srv may not exist.
 version: '3'
 services:
   nextcloud:
-    image: nextcloud:18.0.4
+    image: nextcloud:18.0.9
     container_name: nextcloud
     labels:
       - "traefik.enable=true"
@@ -35,12 +36,13 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_HOST=${DB_HOST}
     volumes:
-      - /srv/nextcloud/data:/var/www/html
-      - /srv/nextcloud/config:/var/www/html/config
-      - /srv/nextcloud/apps:/var/www/html/custom_apps
-      - /srv/nextcloud/themes:/var/www/html/themes/custom_theme
+      - ${VOLUME_ROOT}/nextcloud/data:/var/www/html
+      - ${VOLUME_ROOT}/nextcloud/config:/var/www/html/config
+      - ${VOLUME_ROOT}/nextcloud/apps:/var/www/html/custom_apps
+      - ${VOLUME_ROOT}/nextcloud/themes:/var/www/html/themes/custom_theme
     networks:
       - default
+      - nextcloud
 
   # If using MySQL
   nextcloud-db:
@@ -52,18 +54,19 @@ services:
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     volumes:
-      - /srv/nextcloud/mariadb:/var/lib/mysql
+      - ${VOLUME_ROOT}/nextcloud/mariadb:/var/lib/mysql
     networks:
-      - default
-    
+      - nextcloud
+
   # If using Redis
   redis:
     image: redis:alpine
     container_name: redis
     volumes:
-      - /srv/nextcloud/redis:/data
+      - ${VOLUME_ROOT}/nextcloud/redis:/data
     networks:
       - default
+      - nextcloud
 
   nextcloud-db-backup:
     container_name: nextcloud-db-backup
@@ -71,8 +74,8 @@ services:
     links:
       - nextcloud-db
     volumes:
-      - /srv/db_backups/nextcloud:/backup
-      - /srv/db_backups/script/post-script.sh:/assets/custom-scripts/post-script.sh
+      - ${VOLUME_ROOT}/db_backups/nextcloud:/backup
+      - ${VOLUME_ROOT}/db_backups/script/post-script.sh:/assets/custom-scripts/post-script.sh
     environment:
       - DB_TYPE=${DB_TYPE}
       - DB_HOST=${DB_HOST}
@@ -87,11 +90,11 @@ services:
       - SPLIT_DB=${SPLIT_DB}
     restart: always
     networks:
-      - default
+      - nextcloud
 
 networks:
   default:
-    external: 
-      name: traefik_default
-  # nextcloud:
-  #   external: false
+    external:
+      name: traefik_traefik
+  nextcloud:
+    driver: "bridge"

@@ -1,3 +1,7 @@
 #ENVIRONMENT VARIABLES
 # will exclude all .env files in each directory
 .env
+*srv
+*acme.json
+*cf_api_*.secret
+tmp

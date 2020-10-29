@@ -1,0 +1,14 @@
+---
+#This playbook downloads the latest OpenWFH Docker-Compose repo and start code server
+  - name: Git checkout OpenWFH Repo
+    git:
+      repo: 'https://github.com/openwfh/openwfh-docker-compose.git'
+      dest: /openwfh
+
+  - name: Start Docker containers using Docker-Compose
+    command: docker-compose  -f /openwfh/openwfh-docker-compose/docker-compose/codeserver/docker-compose.yml up -d
+    register: output
+
+  - name: Watch docker-compose output
+    debug:
+      var: output
